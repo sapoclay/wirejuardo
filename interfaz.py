@@ -9,6 +9,7 @@ from wireguard_utils import (
     activar_interfaz,
     comprobar_wireguard,
     desactivar_interfaz,
+    obtener_reglas_iptables,
     instalar_wireguard,
     wg_disponible,
 )
@@ -75,6 +76,34 @@ def crear_app():
         else:
             messagebox.showerror("wg-quick", mensaje)
 
+    def _mostrar_texto_scroll(titulo, contenido):
+        ventana = tk.Toplevel(raiz)
+        ventana.title(titulo)
+        ventana.geometry("760x520")
+        ventana.resizable(True, True)
+
+        contenedor = ttk.Frame(ventana, padding=8)
+        contenedor.pack(fill="both", expand=True)
+
+        barra = ttk.Scrollbar(contenedor, orient="vertical")
+        barra.pack(side="right", fill="y")
+
+        texto = tk.Text(contenedor, wrap="word", yscrollcommand=barra.set)
+        texto.insert("1.0", contenido)
+        texto.configure(state="disabled")
+        texto.pack(side="left", fill="both", expand=True)
+
+        barra.config(command=texto.yview)
+
+    def al_ver_iptables():
+        ok, mensaje, reglas = obtener_reglas_iptables(registrar_log)
+        if ok and reglas:
+            _mostrar_texto_scroll("iptables", reglas)
+        elif ok:
+            messagebox.showinfo("iptables", "No hay reglas para mostrar.")
+        else:
+            messagebox.showwarning("iptables", mensaje)
+
     cuaderno = ttk.Notebook(raiz)
     cuaderno.pack(fill="both", expand=True, padx=8, pady=8)
 
@@ -135,6 +164,9 @@ def crear_app():
         side="left", padx=4
     )
     Tooltip(btn_down, "Baja la interfaz usando wg-quick.")
+    btn_ipt_view = ttk.Button(acciones_sistema, text="Ver iptables", command=al_ver_iptables)
+    btn_ipt_view.pack(side="left", padx=4)
+    Tooltip(btn_ipt_view, "Muestra las reglas actuales de iptables.")
     btn_chk = ttk.Button(acciones_sistema, text="Comprobar WireGuard", command=al_comprobar)
     btn_chk.pack(side="left", padx=4)
     Tooltip(btn_chk, "Ejecuta wg show, ip a, ip route y un ping opcional.")

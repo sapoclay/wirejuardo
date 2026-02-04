@@ -332,3 +332,28 @@ def eliminar_reglas_iptables(interfaz_wg, interfaz_salida, red_interna, registra
             return False, "No se pudieron eliminar todas las reglas de iptables."
 
     return True, "Reglas de iptables eliminadas correctamente."
+
+
+def obtener_reglas_iptables(registrar_log):
+    """Obtiene las reglas actuales de iptables."""
+    registrar_log("Obteniendo reglas actuales de iptables...")
+    if not iptables_disponible():
+        return False, "iptables no está instalado.", None
+
+    prefijo = obtener_prefijo_privilegios(registrar_log)
+    if prefijo is None:
+        return False, "Se requieren privilegios de administrador.", None
+
+    comandos = [
+        (prefijo + ["iptables", "-S"], "Reglas de filter"),
+        (prefijo + ["iptables", "-t", "nat", "-S"], "Reglas de nat"),
+    ]
+
+    bloques = []
+    for comando, titulo in comandos:
+        salida, error = ejecutar_comando(comando)
+        if error:
+            return False, f"Error al obtener iptables: {error}", None
+        bloques.append(f"# {titulo}\n{salida}")
+
+    return True, "Reglas de iptables obtenidas.", "\n\n".join(bloques)
