@@ -1,4 +1,5 @@
 # WireJuardo GUI (Tkinter)
+## ESTO TODAVÍA NO HACE LO QUE DEBE
 
 Aplicación gráfica para **instalar, configurar y administrar WireGuard** en Debian, Kali o Ubuntu. Permite generar claves, crear archivos de configuración de cliente/servidor, activar/desactivar interfaces con `wg-quick` y aplicar reglas básicas de `iptables` para NAT.
 
