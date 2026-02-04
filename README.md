@@ -50,6 +50,18 @@ Con los botones:
 
 > Nota: se requieren privilegios de administrador (sudo/pkexec).
 
+## Dónde colocar los archivos .conf
+
+En Debian/Kali/Ubuntu, WireGuard busca las configuraciones en:
+
+- `/etc/wireguard/<interfaz>.conf` (por ejemplo `/etc/wireguard/wg0.conf`)
+
+Si quieres usar el servicio `wg-quick@wg0`, el archivo debe estar en esa ruta.
+
+El programa permite guardar el archivo en cualquier carpeta y también activar con `wg-quick` usando una ruta directa. Si guardas fuera de `/etc/wireguard`, asegúrate de seleccionar el archivo correcto cuando uses **Activar wg-quick**.
+
+> Nota: para escribir en `/etc/wireguard` se requieren permisos de administrador.
+
 
 ## Estructura del proyecto
 

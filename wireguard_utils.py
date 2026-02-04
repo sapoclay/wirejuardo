@@ -81,11 +81,60 @@ def ejecutar_comando_con_log(comando, descripcion, registrar_log):
     return False
 
 
-def comprobar_wireguard(ping_ip, registrar_log):
+def comprobar_wireguard(ping_ip, registrar_log, interfaz_esperada=None, rol="servidor"):
     """Ejecuta comprobaciones básicas de WireGuard y conectividad."""
     registrar_log("Comprobando estado de WireGuard...")
+
+    salida_wg, error = ejecutar_comando(["wg", "show"])
+    if error:
+        registrar_log(f"Error al ejecutar wg show: {error}")
+        return False, "No se pudo ejecutar 'wg show'."
+    registrar_log("Salida de wg show")
+    registrar_log(salida_wg or "(sin salida)")
+
+    if not salida_wg or "interface:" not in salida_wg:
+        return False, "WireGuard no parece estar activo (sin interfaces en wg show)."
+
+    interfaces = {}
+    actual = None
+    for linea in salida_wg.splitlines():
+        if linea.startswith("interface:"):
+            actual = linea.split(":", 1)[1].strip()
+            interfaces[actual] = []
+            continue
+        if actual is not None:
+            interfaces[actual].append(linea)
+
+    interfaz_objetivo = interfaz_esperada or next(iter(interfaces), None)
+    if interfaz_objetivo is None or interfaz_objetivo not in interfaces:
+        return False, "No se encontró la interfaz WireGuard indicada."
+
+    bloque = interfaces[interfaz_objetivo]
+    total_peers = sum(1 for linea in bloque if linea.strip().startswith("peer:"))
+    tiene_endpoint = any("endpoint:" in linea for linea in bloque)
+    handshake_linea = next((linea for linea in bloque if "latest handshake:" in linea), "")
+    handshake_ok = bool(handshake_linea) and "never" not in handshake_linea.lower() and "0" not in handshake_linea
+
+    rol_normalizado = (rol or "servidor").strip().lower()
+    if rol_normalizado.startswith("serv"):
+        if total_peers == 0:
+            return False, "WireGuard está activo, pero no hay peers configurados en el servidor."
+    elif rol_normalizado.startswith("cli"):
+        if total_peers == 0:
+            return False, "WireGuard está activo, pero el cliente no tiene peer configurado."
+        if not tiene_endpoint:
+            return False, "WireGuard está activo, pero el cliente no tiene endpoint configurado."
+    else:
+        registrar_log("Rol no reconocido, usando comprobaciones generales.")
+
+    if not handshake_ok:
+        return False, "WireGuard está activo, pero no hay handshake reciente con el peer."
+
+    registrar_log(
+        f"Interfaz comprobada: {interfaz_objetivo} | peers: {total_peers} | handshake: OK"
+    )
+
     comandos = [
-        (["wg", "show"], "Salida de wg show"),
         (["ip", "a"], "Interfaces de red (ip a)"),
         (["ip", "route"], "Rutas del sistema (ip route)"),
     ]
@@ -102,9 +151,9 @@ def comprobar_wireguard(ping_ip, registrar_log):
             registrar_log,
         )
         if not ok:
-            return False, "El ping no fue exitoso."
+            return False, "WireGuard está activo, pero el ping no fue exitoso."
 
-    return True, "Comprobaciones finalizadas."
+    return True, "WireGuard está activo y las comprobaciones finalizaron."
 
 
 def obtener_prefijo_privilegios(registrar_log):
