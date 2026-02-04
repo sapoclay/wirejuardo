@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
@@ -137,10 +138,52 @@ def crear_pestana_servidor(cuaderno, registrar_log):
             registrar_log(f"Error al generar claves: {error}")
             messagebox.showerror("Error", error)
             return
+        if clave_privada is None or clave_publica is None:
+            registrar_log("No se pudieron generar las claves.")
+            messagebox.showerror("Error", "No se pudieron generar las claves.")
+            return
         entradas["clave_privada"].delete(0, tk.END)
         entradas["clave_privada"].insert(0, clave_privada)
         registrar_log("Clave privada insertada en el formulario.")
-        messagebox.showinfo("Clave pública", f"Clave pública generada:\n{clave_publica}")
+        raiz = marco.winfo_toplevel()
+        raiz.clipboard_clear()
+        raiz.clipboard_append(clave_publica)
+        registrar_log("Clave pública copiada al portapapeles.")
+        directorio = filedialog.askdirectory(title="Seleccionar carpeta para guardar claves")
+        entrada_nombre = entradas.get("nombre_interfaz")
+        nombre_interfaz = (entrada_nombre.get().strip() if entrada_nombre else "") or "wg0"
+        if not directorio:
+            registrar_log("Guardado de claves cancelado por el usuario.")
+            registrar_log(
+                "No se guardaron archivos: "
+                f"{nombre_interfaz}.privkey, {nombre_interfaz}.pubkey"
+            )
+            messagebox.showinfo(
+                "Clave pública",
+                "Clave pública copiada al portapapeles:\n\n" + clave_publica,
+            )
+            return
+        ruta_privada = os.path.join(directorio, f"{nombre_interfaz}.privkey")
+        ruta_publica = os.path.join(directorio, f"{nombre_interfaz}.pubkey")
+        try:
+            with open(ruta_privada, "w", encoding="utf-8") as archivo_privado:
+                archivo_privado.write(clave_privada + "\n")
+            with open(ruta_publica, "w", encoding="utf-8") as archivo_publico:
+                archivo_publico.write(clave_publica + "\n")
+            registrar_log(f"Clave privada guardada en: {ruta_privada}")
+            registrar_log(f"Clave pública guardada en: {ruta_publica}")
+            messagebox.showinfo(
+                "Claves guardadas",
+                "Clave pública copiada al portapapeles y claves guardadas en:\n"
+                f"{ruta_privada}\n{ruta_publica}",
+            )
+        except OSError as exc:
+            registrar_log(f"Error al guardar claves: {exc}")
+            messagebox.showerror("Error", f"No se pudieron guardar las claves:\n{exc}")
+        messagebox.showinfo(
+            "Clave pública",
+            "Clave pública copiada al portapapeles:\n\n" + clave_publica,
+        )
 
     def al_previsualizar():
         registrar_log("Generando previsualización de la configuración del servidor...")
@@ -290,10 +333,47 @@ def crear_pestana_cliente(cuaderno, registrar_log):
             registrar_log(f"Error al generar claves: {error}")
             messagebox.showerror("Error", error)
             return
+        if clave_privada is None or clave_publica is None:
+            registrar_log("No se pudieron generar las claves.")
+            messagebox.showerror("Error", "No se pudieron generar las claves.")
+            return
         entradas["clave_privada"].delete(0, tk.END)
         entradas["clave_privada"].insert(0, clave_privada)
         registrar_log("Clave privada insertada en el formulario.")
-        messagebox.showinfo("Clave pública", f"Clave pública generada:\n{clave_publica}")
+        raiz = marco.winfo_toplevel()
+        raiz.clipboard_clear()
+        raiz.clipboard_append(clave_publica)
+        registrar_log("Clave pública copiada al portapapeles.")
+        directorio = filedialog.askdirectory(title="Seleccionar carpeta para guardar claves")
+        nombre_base = "wg0"
+        if not directorio:
+            registrar_log("Guardado de claves cancelado por el usuario.")
+            registrar_log(
+                "No se guardaron archivos: "
+                f"{nombre_base}.privkey, {nombre_base}.pubkey"
+            )
+            messagebox.showinfo(
+                "Clave pública",
+                "Clave pública copiada al portapapeles:\n\n" + clave_publica,
+            )
+            return
+        ruta_privada = os.path.join(directorio, f"{nombre_base}.privkey")
+        ruta_publica = os.path.join(directorio, f"{nombre_base}.pubkey")
+        try:
+            with open(ruta_privada, "w", encoding="utf-8") as archivo_privado:
+                archivo_privado.write(clave_privada + "\n")
+            with open(ruta_publica, "w", encoding="utf-8") as archivo_publico:
+                archivo_publico.write(clave_publica + "\n")
+            registrar_log(f"Clave privada guardada en: {ruta_privada}")
+            registrar_log(f"Clave pública guardada en: {ruta_publica}")
+            messagebox.showinfo(
+                "Claves guardadas",
+                "Clave pública copiada al portapapeles y claves guardadas en:\n"
+                f"{ruta_privada}\n{ruta_publica}",
+            )
+        except OSError as exc:
+            registrar_log(f"Error al guardar claves: {exc}")
+            messagebox.showerror("Error", f"No se pudieron guardar las claves:\n{exc}")
 
     def al_previsualizar():
         registrar_log("Generando previsualización de la configuración del cliente...")
