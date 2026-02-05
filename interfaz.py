@@ -153,7 +153,7 @@ def crear_app():
     btn_inst.pack(
         side="left", padx=4
     )
-    Tooltip(btn_inst, "Instala WireGuard en Debian/Kali/Ubuntu.")
+    Tooltip(btn_inst, "Instalación de WireGuard en Debian/Kali/Ubuntu.")
     btn_up = ttk.Button(acciones_sistema, text="Activar wg-quick", command=al_activar)
     btn_up.pack(
         side="left", padx=4
@@ -166,7 +166,7 @@ def crear_app():
     Tooltip(btn_down, "Baja la interfaz usando wg-quick.")
     btn_ipt_view = ttk.Button(acciones_sistema, text="Ver iptables", command=al_ver_iptables)
     btn_ipt_view.pack(side="left", padx=4)
-    Tooltip(btn_ipt_view, "Muestra las reglas actuales de iptables.")
+    Tooltip(btn_ipt_view, "Muestra las reglas actuales de iptables en el equipo.")
     btn_chk = ttk.Button(acciones_sistema, text="Comprobar WireGuard", command=al_comprobar)
     btn_chk.pack(side="left", padx=4)
     Tooltip(btn_chk, "Ejecuta wg show, ip a, ip route y un ping opcional.")

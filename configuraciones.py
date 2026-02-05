@@ -97,6 +97,7 @@ def _escribir_archivo_con_privilegios(ruta, contenido, registrar_log):
             capture_output=True,
             check=True,
         )
+        
         if resultado.stderr:
             registrar_log(resultado.stderr.strip())
         return True, None
@@ -124,6 +125,7 @@ def escribir_archivo(ruta, contenido, registrar_log):
 
 
 def _directorio_wireguard_preferido():
+    """Ruta por defecto para guardar wg0.conf en sistemas Linux con WireGuard instalado."""
     ruta = "/etc/wireguard"
     if os.path.isdir(ruta) and os.access(ruta, os.W_OK | os.X_OK):
         return ruta

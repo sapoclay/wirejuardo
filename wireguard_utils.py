@@ -31,7 +31,8 @@ def iptables_disponible():
 
 
 def generar_par_claves(registrar_log=None):
-    """Genera claves privada y pública usando 'wg' (WireGuard)."""
+    """Genera claves privada y pública usando 'wg' (WireGuard) en el equipo."""
+    
     if registrar_log:
         registrar_log("Comprobando disponibilidad de WireGuard...")
     if not wg_disponible():
@@ -173,7 +174,7 @@ def obtener_prefijo_privilegios(registrar_log):
 
 
 def instalar_wireguard(registrar_log):
-    """Instala WireGuard en Debian/Kali usando apt-get."""
+    """Instala WireGuard en Debian/Kali usando apt-get de forma automática"""
     registrar_log("Iniciando instalación automática de WireGuard en Debian/Kali...")
     if wg_disponible():
         registrar_log("WireGuard ya está instalado. No se requiere instalación.")
